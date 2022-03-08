@@ -35,7 +35,17 @@
             "error",
             {
                 "newlines-between": "always",
-                "pathGroupsExcludedImportTypes": ["builtin"]
+                "pathGroupsExcludedImportTypes": ["builtin"],
+                "groups": [
+                    "builtin",
+                    "external",
+                    "internal",
+                    "parent",
+                    "sibling",
+                    "index",
+                    "object",
+                    "type"
+                ]
             }
         ],
         "import/extensions": [

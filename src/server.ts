@@ -1,10 +1,11 @@
 import express from 'express';
 import { graphqlHTTP } from 'express-graphql';
+import 'reflect-metadata';
 import cors from 'cors';
 import { createConnection } from 'typeorm';
+import { buildSchema } from 'type-graphql';
 
-import { schema } from './schema';
-import { User } from './entities/user';
+import { User } from './entities/User';
 
 const main = async () => {
     await createConnection({
@@ -23,6 +24,11 @@ const main = async () => {
 
     // accept data as json.
     app.use(express.json());
+
+    const schema = await buildSchema({
+        // Load all resolvers
+        resolvers: [`${__dirname  }/resolvers/**/*.{ts,js}`],
+    });
 
     app.use(
         '/graphql',

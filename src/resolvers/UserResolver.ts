@@ -147,8 +147,10 @@ export class UserResolver {
 
                   return event;
                 * */
+                return event!;
             }
 
+            // TODO: need to make more detail
             return null;
         } catch (err) {
             throw new Error(`Error: ${err}`);

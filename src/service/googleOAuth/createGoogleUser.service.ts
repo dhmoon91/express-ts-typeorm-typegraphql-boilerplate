@@ -9,7 +9,7 @@ export const createGoogleUser = async (
     refreshtoken: string,
     req: Request
 ): Promise<User> => {
-    let user;
+    let user: any;
 
     // Store the values into DB
     const refreshToken = GoogleToken.create({
@@ -20,28 +20,33 @@ export const createGoogleUser = async (
 
     // Check the user login up via Termin or not
     if (req.session.userId) {
-        const id = req.session.userId as number;
+        user = await User.update(
+            { id: req.session.userId },
+            { isSync: true, googleTokenId: refreshToken.id }
+        );
 
-        await User.update({ id }, { isSync: true });
+        // set the userId into refreshToken DB
+        refreshToken.userId = req.session.userId;
 
-        user = await User.findOne({ where: { id } });
+        user = await User.findOne({ where: { id: req.session.userId } });
+    } else {
+        // The user signed up via Google
+        user = User.create({
+            email: googleUser.email,
+            firstName: googleUser.firstName,
+            lastName: googleUser.lastName,
+            picture: googleUser.picture,
+            isSync: true,
+            googleTokenId: refreshToken.id,
+        });
+
+        await user.save();
+
+        // set the userId into refreshToken DB
+        refreshToken.userId = user.id;
     }
 
-    // The user login up via Google
-    user = User.create({
-        email: googleUser.email,
-        firstName: googleUser.firstName,
-        lastName: googleUser.lastName,
-        picture: googleUser.picture,
-        isSync: true,
-        googleTokenId: refreshToken.id,
-    });
-
-    await user.save();
-
-    // set the userId into refreshToken DB
-    refreshToken.userId = user.id;
     await refreshToken.save();
 
-    return user;
+    return user!;
 };
